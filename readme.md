@@ -39,3 +39,33 @@ Acompanhe essa aventura via o [BLOG](http://humbertocsjr.dev.br)
 - Interface gráfica com o usuário
 
 
+
+## Como compilar
+
+#### Pré requisitos
+
+- DOSBOX-X com LFN ativado
+
+- Linux para gerar as imagens (Em breve será substituido pela ferramenta minixfs multiplataforma)
+
+#### Compilando a parte do DOSBOX-X
+
+- Inicie a sessão do DOSBOX montando como unidade C: a pasta raiz desse projeto
+
+- Execute o comando abaixo:
+
+```batch
+compilar.bat
+```
+
+Ele deve automaticamente compilar cada sub projeto
+
+#### Compilando a parte do Linux
+
+- Para criar as imagens (.img) se deve executar o comando:
+
+```shell
+make
+```
+
+Ele vai pegar os binarios criador pela parte do DOSBOX-X e gerar as imagens de 360 KiB e 1440 KiB
