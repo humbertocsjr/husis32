@@ -1,5 +1,4 @@
-
-del %1.com
+echo == Compilando %1
 del %1.rot
 \Nativo\osasmcom %1
 ren %1.com %1.rot

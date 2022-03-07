@@ -1,3 +1,8 @@
+; Modulo de Terminal
+; Copyright (c) 2022, Humberto Costa dos Santos Junior (humbertocsjr)
+;
+; Historia:
+; - 22.02.27 - Versao inicial
 
 ; TermEscreverC
 ; Escreve um caractere na tela
@@ -5,9 +10,11 @@
 term1:
     push ax
     push bx
+    push bp
     movb ah, #0xe
     mov bx, #0xf
     int #0x10
+    pop bp
     pop bx
     pop ax
     retf
@@ -107,7 +114,7 @@ term5:
     push dx
     xor dx, dx
     cmp ax, #0
-    je term2Fim
+    je term5Fim
         mov bx, #10
         div bx
         cmp ax, #0
@@ -116,7 +123,7 @@ term5:
         call term5Inicio
     term5Fim:
     mov ax, dx
-    addb al,#'0'
+    addb al, #'0'
     seg cs
     callf TermEscreverC
     pop dx

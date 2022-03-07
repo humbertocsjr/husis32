@@ -1,8 +1,28 @@
+; Nucleo do HUSIS
+; Copyright (c) 2022, Humberto Costa dos Santos Junior (humbertocsjr)
+;
+; Historia:
+; - 22.02.27 - Versao inicial
+; - 22.03.07 - Integrado o modulo de unidades de disco
+;
+; Versionamento do HUSIS:
+; - Versao sempre sera o Ano atual
+; - SubVersao sempre sera o Mes atual
+; - Revisao sempre sera o Dia atual multiplicado por dez, somado a subrevisao
+;   do dia
+;
+;   Exemplo: Data: 2022.03.07 SubRevisao 3 -> v22.03 R73 
+;
+;   O versionamento do Sistema Operacional HUSIS eh baseado no versionamento
+;   do nucleo, que eh definido neste arquivo.
+;
+
 .include /HUSIS/Base.cf/baseprg.s
 
 Versao = 22                             ; Ano
-SubVersao = 2                           ; Mes
-Revisao = 26                            ; Dia
+SubVersao = 03                          ; Mes
+Revisao = 07        * 10 + SubRevisao   ; Dia * 10 + SubRevisao dentro do dia
+SubRevisao = 0                          ; Deve ser zerado a cada dia
 
 Pilha = 4096
 
@@ -70,6 +90,33 @@ Exportar:
     TermEscreverNroEspaco:              ; 20
         .word term5
         .word 0
+    UnidadesPonteiro:                   ; 21
+        .word unidades2
+        .word 0
+    UnidadesLerBloco512:                ; 22
+        .word unidades3
+        .word 0
+    UnidadesGravarBloco512:             ; 23
+        .word unidades4
+        .word 0
+    UnidadesChamar:                     ; 24
+        .word unidades8
+        .word 0
+    UnidadesLerCampo8:                  ; 25
+        .word unidades5
+        .word 0
+    UnidadesLerCampo16:                 ; 26
+        .word unidades6
+        .word 0
+    UnidadesLerCampo32:                 ; 27
+        .word unidades7
+        .word 0
+    HUSISLerVersao:                     ; 28
+        .word prog2
+        .word 0
+    HUSISVerificarVersao:               ; 29
+        .word prog3
+        .word 0
     .word FimExportar
 Importar:
     InicialEscreverNro:
@@ -99,9 +146,10 @@ GlobalMemTam:
     .word 0
 GlobalMemBlocos:
     .word 0
-
 GlobalProcessoAtual:
     .word 1
+GlobalUnidadesPos:
+    .word 0
 
 Inicial:
     ; Armazenando os ponteiros recebidos
@@ -128,7 +176,22 @@ Inicial:
     callf ArrumarExportar
 
     callf TermEscrever
-    .asciz "HUSIS"
+    .asciz "HUSIS v"
+    
+    mov ax, #Versao
+    callf TermEscreverNro
+    
+    callf TermEscrever
+    .asciz "."
+    
+    mov ax, #SubVersao
+    callf TermEscreverNro
+    
+    callf TermEscrever
+    .asciz " R"
+    
+    mov ax, #Revisao
+    callf TermEscreverNro
 
     call memIniciar
 
@@ -163,9 +226,8 @@ Inicial:
     callf MemLivre256
     callf TermEscreverNroEspaco
 
-    mov cx, #10
-    callf MemAlocar256
-
+    call unidadesIniciar
+    
     callf MemLivre256
     callf TermEscreverNroEspaco
 
@@ -198,8 +260,38 @@ prog1:
     pop si
     retf
 
+; HUSISLerVersao
+; ret: ax: Versao
+;      bx: SubVersao
+;      cx: Revisao
+prog2:
+    mov ax, #Versao
+    mov bx, #SubVersao
+    mov cx, #Revisao
+    retf
+
+; HUSISVerificarVersao
+; ax: Versao Minima
+; bx: SubVersao Minima
+; cx: Revisao Minima
+; ret: cf: 1=Ok | 0=Incompativel
+prog3:
+    cmp ax, #Versao
+    jb prog3Incompativel
+    cmp bx, #SubVersao
+    jb prog3Incompativel
+    cmp bx, #Revisao
+    jb prog3Incompativel
+    stc
+    retf
+    prog3Incompativel:
+        clc
+        retf
+
 .include /HUSIS/Nucleo.rag/txt.s
 .include /HUSIS/Nucleo.rag/term.s
 .include /HUSIS/Nucleo.rag/mem.s
+.include /HUSIS/Nucleo.rag/unidades.s
+.include /HUSIS/Nucleo.rag/saminix.s
 
 Fim:

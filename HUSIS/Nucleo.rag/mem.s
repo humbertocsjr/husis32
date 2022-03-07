@@ -1,3 +1,9 @@
+; Gerenciador de Memoria RAM
+; Copyright (c) 2022, Humberto Costa dos Santos Junior (humbertocsjr)
+;
+; Historia:
+; - 22.02.27 - Versao inicial
+; - 22.03.07 - Correcoes do MemAlocar256 e Implementacao do MemLiberar256
 
 memIniciar:
     push ax
@@ -123,6 +129,7 @@ mem2:
             mem2IniciaVerificacao:
             mov bx, si
             dec bx
+            dec bx
             mov di, #1
             jmps mem2ContinuaBuscando
         mem2ZeraEncontrados:
@@ -148,6 +155,7 @@ mem2:
     shl bx
     shl bx
     shl bx
+    shr bx
     push bx
     pop es
     stc
@@ -164,4 +172,58 @@ mem2:
 ; Libera um conjunto de blocos de 256 bytes
 ; es: Primeiro segmento do conjunto a ser liberado
 mem3:
+    push ax
+    push bx
+    push cx
+    push dx
+    push si
+    push es
+    push ds
+    ; Define os segmentos e ponteiros usados
+    push cs
+    pop ds
+    push es
+    pop bx
+    seg cs
+    mov ax, GlobalMemPos
+    mov es, ax
+    ; Calcula de segmentos para blocos
+    shr bx
+    shr bx
+    shr bx
+    shr bx
+    ; Usa o numero do bloco para olhar na tabela
+    ; Para facilitar a leitura por pessoas, esta multiplicando por 2 para
+    ; que o indice se adapte aos registros da tabela de 16bits (2 bytes)
+    ; alternativa a isso seria retirar um shr bx acima e fazer um and que
+    ; ignorasse o bit 0, para que ele alinhasse corretamente mesmo que se
+    ; passe como argumento um es invalido
+    shl bx
+    ; Le item da tabela
+    seg es
+    mov ax, [bx]
+    xor dx, dx
+    movb dl, GlobalProcessoAtual
+    cmp ax, dx
+    je mem3Encontrado
+        clc
+        jmp mem3Fim
+    mem3Encontrado:
+        seg es
+        cmp [bx], dx
+        jne mem3Fim
+        seg es
+        mov [bx], #0
+        incb dh
+        inc bx
+        inc bx
+        jmp mem3Encontrado:
+    mem3Fim:
+    pop ds
+    pop es
+    pop si
+    pop dx
+    pop cx
+    pop bx
+    pop ax
     retf
