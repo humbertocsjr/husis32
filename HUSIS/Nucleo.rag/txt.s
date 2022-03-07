@@ -1,4 +1,8 @@
- 
+; Modulo de Manipulacao de Texto
+; Copyright (c) 2022, Humberto Costa dos Santos Junior (humbertocsjr)
+;
+; Historia:
+; - 22.02.27 - Versao inicial 
 
 ; TxtTamanhoDSDS
 ; Conta o tamanho de uma string

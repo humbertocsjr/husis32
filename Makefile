@@ -5,9 +5,12 @@ all:
 	@sudo mount  img360.img Temp/
 	@tree Temp
 	@df Temp
+	@sync
 	@sudo umount Temp
-teste:
-	@! dosemu -dumb -d ./ -E "G:\DOSEMU.BAT"
+	@echo == Tamanho do Nucleo em Bytes
+	@ls -la HUSIS/Nucleo.rag/prog.rot |cut -d ' ' -f 5  
+teste: all
+	@qemu-system-i386 -fda img360.img
 img360:
 	@echo == Criando imagem de 360 KiB
 	@dd if=/dev/zero of=imagem.img bs=1024 count=360 status=none
@@ -31,9 +34,9 @@ arrumaimagem:
 	@sudo chmod -R +rw Temp/
 	@echo == Copiando Sistema Operacional
 	@cp HUSIS/SistemaInicial.rag/etapa2.bin Etapa2.bin
-	@cat HUSIS/SistemaInicial.rag/ptbr.bin >> Etapa2.bin
+	@cat HUSIS/SistemaInicial.rag/trad.bin >> Etapa2.bin
 	@cp Etapa2.bin Temp/Etapa2.bin
-	@cp license Temp/License.txt
+	@cp license.txt Temp/License.txt
 	@mkdir Temp/HUSIS
 	@mkdir Temp/Programas
 	@mkdir Temp/Perfis

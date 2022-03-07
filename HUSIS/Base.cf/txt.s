@@ -27,7 +27,7 @@
     TxtConcatESDS:
         .word 9
         .word 0
-    TxtCopiarCSDS:
+    TxtConcatCSDS:
         .word 10
         .word 0
     TxtConcatCSES:
