@@ -1,3 +1,11 @@
+/*
+ * Cabecalho do Modulo de Entrada e Saida Nativo
+ * Copyright (c) 2022, Humberto Costa dos Santos Junior (humbertocsjr)
+ * 
+ * Historia:
+ * - Versão inicial
+ */
+
 #ifndef ES_H
 #define ES_H
 #include "husis.h"

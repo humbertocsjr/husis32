@@ -1,3 +1,11 @@
+/*
+ * HUSIS - Arquivo base do nucleo
+ * Copyright (c) 2022, Humberto Costa dos Santos Junior (humbertocsjr)
+ * 
+ * Historia:
+ * - Versão inicial
+ */
+
 #ifndef HUSIS_H
 #define HUSIS_H
 

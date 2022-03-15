@@ -1,3 +1,11 @@
+/*
+ * HUSIS - Humberto Sistema Operacional
+ * Copyright (c) 2022, Humberto Costa dos Santos Junior (humbertocsjr)
+ * 
+ * Historia:
+ * - Versão inicial
+ */
+
 #include "husis.h"
 #include "versao.h"
 #include "es.h"

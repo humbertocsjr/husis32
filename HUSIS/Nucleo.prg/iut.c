@@ -1,3 +1,11 @@
+/*
+ * Interface com o Usuario via Texto
+ * Copyright (c) 2022, Humberto Costa dos Santos Junior (humbertocsjr)
+ * 
+ * Historia:
+ * - Versão inicial
+ */
+
 #include "iut.h"
 #include "es.h"
 

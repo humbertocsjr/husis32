@@ -34,3 +34,4 @@ Existem outros projetos incluidos em sua forma de código fonte ou binária e es
 - Biblioteca C para o SmallerC
 - Implementar carregamento de executáveis a.out
 - Porte do FASM e do SmallerC para o HUSIS
+- Criar um sistema inicial para carregar o nucleo, e não precisar do SYSLINUX/LILI/GRUB

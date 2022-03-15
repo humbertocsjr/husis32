@@ -1,3 +1,11 @@
+/*
+ * Modulo de Entrada e Saida para PC com processador 386
+ * Copyright (c) 2022, Humberto Costa dos Santos Junior (humbertocsjr)
+ * 
+ * Historia:
+ * - Versão inicial
+ */
+
 #include "es.h" 
 
 asm("section .text align 4");
