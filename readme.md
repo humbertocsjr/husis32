@@ -32,4 +32,5 @@ Existem outros projetos incluidos em sua forma de código fonte ou binária e es
 
 - Suporte ao sistema de arquivos Minix v1
 - Biblioteca C para o SmallerC
+- Implementar carregamento de executáveis a.out
 - Porte do FASM e do SmallerC para o HUSIS
