@@ -1,1 +1,0 @@
-\Nativo\rot prog
