@@ -4,6 +4,7 @@ all:
 	@rm -Rf Temp/*
 	@find boot -name \*.cfg -exec install -D '{}' Temp'/{}' ';'
 	@find HUSIS -name \*.rot -exec install -D '{}' Temp'/{}' ';'
+	@find HUSIS -name \*.elf -exec install -D '{}' Temp'/{}' ';'
 	@find HUSIS -name \*.cfg -exec install -D '{}' Temp'/{}' ';'
 	@grub-mkrescue -o Imagens/Disco.iso Temp
 	@dd if=/dev/zero of=Imagens/Disquete.img bs=1024 count=1340
@@ -15,7 +16,7 @@ all:
 	@minixfs add Imagens/Disquete.img boot/grub/menu.lst boot/grub/menu.lst
 	@minixfs mkdir Imagens/Disquete.img HUSIS
 	@minixfs mkdir Imagens/Disquete.img HUSIS/Nucleo.prg
-	@minixfs add Imagens/Disquete.img HUSIS/Nucleo.prg/prog.rot HUSIS/Nucleo.prg/prog.rot
+	@minixfs add Imagens/Disquete.img HUSIS/Nucleo.prg/prog.elf HUSIS/Nucleo.prg/prog.elf
 	@rm -Rf Temp/*
 
 qemu: all

@@ -5,5 +5,5 @@ default 0
 
 title HUSIS
 root (fd0)
-kernel --type=multiboot /HUSIS/Nucleo.prg/prog.rot
+kernel --type=multiboot /HUSIS/Nucleo.prg/prog.elf
 
