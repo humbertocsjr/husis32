@@ -24,3 +24,6 @@ qemu: all
 
 disquete: all
 	@qemu-system-i386 -fda Imagens/Disquete.img 
+	
+86box: all
+	@cd ../86Box && ./86Box.AppImage

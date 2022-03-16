@@ -3,11 +3,15 @@
  * Copyright (c) 2022, Humberto Costa dos Santos Junior (humbertocsjr)
  * 
  * Historia:
- * - Versão inicial
+ * - 22.03.14 - Versão inicial
+ * 
+ * Informações:
+ * - Implementa os componentes visuais usando caracteres ASCII (Limitando ao CP850)
  */
 
 #include "iut.h"
 #include "es.h"
+#include "es_video.h"
 
 void iut_iniciar()
 {
@@ -17,10 +21,12 @@ void iut_iniciar()
 
 void iut_desenha_caixa(tam_t x1, tam_t y1, tam_t largura, tam_t altura, cor_t cor_borda, cor_t cor_fundo)
 {
+    // Desenha a parte superior da caixa
     es_video_escreva_c(x1, y1, 218, cor_borda, cor_fundo);
     es_video_escreva_c_repetido(x1 + 1, y1, largura - 2, 196, cor_borda, cor_fundo, ES_VIDEO_LIMITE_LINHA);
     es_video_escreva_c(x1 + largura - 1, y1, 191, cor_borda, cor_fundo);
     
+    // Desenha o meio da caixa
     for(tam_t y = y1 + 1; y < (y1 + altura - 1); y++)
     {
         es_video_escreva_c(x1, y, 179, cor_borda, cor_fundo);
@@ -28,6 +34,7 @@ void iut_desenha_caixa(tam_t x1, tam_t y1, tam_t largura, tam_t altura, cor_t co
         es_video_escreva_c(x1 + largura - 1, y, 179, cor_borda, cor_fundo);
     }
     
+    // Desenha a parte inferior da caixa
     es_video_escreva_c(x1, y1 + altura -1, 192, cor_borda, cor_fundo);
     es_video_escreva_c_repetido(x1 + 1, y1 + altura -1, largura - 2, 196, cor_borda, cor_fundo, ES_VIDEO_LIMITE_LINHA);
     es_video_escreva_c(x1 + largura - 1, y1 + altura -1, 217, cor_borda, cor_fundo);
@@ -35,6 +42,7 @@ void iut_desenha_caixa(tam_t x1, tam_t y1, tam_t largura, tam_t altura, cor_t co
 
 void iut_desenha_linha_h(tam_t x1, tam_t y1, tam_t largura, cor_t cor_borda, cor_t cor_fundo)
 {
+    // Desenha uma linha horizontal na tela
     es_video_escreva_c(x1, y1, 195, cor_borda, cor_fundo);
     es_video_escreva_c_repetido(x1 + 1, y1, largura - 2, 196, cor_borda, cor_fundo, ES_VIDEO_LIMITE_LINHA);
     es_video_escreva_c(x1 + largura - 1, y1, 180, cor_borda, cor_fundo);
@@ -42,20 +50,26 @@ void iut_desenha_linha_h(tam_t x1, tam_t y1, tam_t largura, cor_t cor_borda, cor
 
 void iut_desenha_rotulo(tam_t x1, tam_t y1, tam_t largura, txt_t txt, cor_t cor_texto, cor_t cor_fundo)
 {
+    // Desenha um rotulo de texto
     es_video_escreva_txt(x1, y1, largura, txt, cor_texto, cor_fundo, ES_VIDEO_LIMITE_LINHA);
 }
 
 void iut_desenha_janela(tam_t x1, tam_t y1, tam_t largura, tam_t altura, txt_t titulo, iut_opcoes_t botoes)
 {
+    // Desenha uma janela usando os componentes comuns
     iut_desenha_caixa(x1, y1, largura, altura, COR_CIANO, COR_PRETO);
     iut_desenha_linha_h(x1, y1 + 2, largura, COR_CIANO, COR_PRETO);
     iut_desenha_rotulo(x1 + 2, y1 + 1, largura - 5, titulo, COR_CIANO_CLARO, COR_PRETO);
-    iut_desenha_rotulo(x1 + largura - 3, y1 + 1, 2, "x", COR_VERMELHO_CLARO, COR_PRETO);
+    if(botoes == IUT_BOTAO_FECHAR)
+    {
+        iut_desenha_rotulo(x1 + largura - 3, y1 + 1, 2, "x", COR_VERMELHO_CLARO, COR_PRETO);
+    }
 }
 
 void iut_desenha_progresso(tam_t x1, tam_t y1, tam_t largura, uint8_t percentual, cor_t cor_barra, cor_t cor_fundo)
 {
     if(percentual > 100) percentual = 100;
+    // Desenha uma barra de progresso usando caracteres claros e escuros
     es_video_escreva_c_repetido(x1, y1, largura , 176, cor_barra, cor_fundo, ES_VIDEO_LIMITE_LINHA);
     es_video_escreva_c_repetido(x1, y1, largura * percentual / 100, 178, cor_barra, cor_fundo, ES_VIDEO_LIMITE_LINHA);
 }

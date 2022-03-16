@@ -1,33 +1,52 @@
 /*
- * Modulo de Entrada e Saida para PC com processador 386
+ * Modulo de Entrada e Saida para PC com processador 386 ou superior
  * Copyright (c) 2022, Humberto Costa dos Santos Junior (humbertocsjr)
  * 
  * Historia:
- * - Versão inicial
+ * - 22.03.14 - Versão inicial
  */
 
 #include "es.h" 
+#include "es_video.h"
 
+// Ponteiros do SmallerC Linker que apontam para o inicio e fim do binario
+asm("extrn __start_allcode__");
+asm("extrn __stop_alldata__");
+
+// Estrutura Multiboot, informa ao Boot Loader o formato do nucleo e onde fica o ponto inicial
 asm("section .text align 4");
 asm("multiboot:");
-asm("dd 0x1badb002");
-asm("dd 65539");
-asm("dd -(0x1badb002 + (65539))");
-asm("dd multiboot");
-asm("extrn __start_allcode__");
-asm("dd __start_allcode__");
-asm("extrn __stop_alldata__");
-asm("dd __stop_alldata__");
-asm("dd 0");
-asm("dd __start");
-asm("section .bss");
-asm("rb 16384");
-asm("pilha_topo:");
+asm("   dd 0x1badb002");
+asm("   dd 65539");
+asm("   dd -(0x1badb002 + (65539))");
+asm("   dd multiboot");
+asm("   dd __start_allcode__");
+asm("   dd __stop_alldata__");
+asm("   dd 0");
+asm("   dd _es_inicial");
 
+// Reserva 16 KiB para a pilha
+asm("section .bss");
+asm("   rb 16384");
+asm("   pilha_topo:");
+
+// ES_H
+
+
+// Ponto de partida do executavel comum
 void _start()
 {
+    // Caso seja executado diretamente depois que o sistema operacional estiver carregado, ele não faz nada e encerra.
+}
+
+// Ponto de partida do executavel Multiboot
+void es_inicial()
+{
+    // Define a pilha para o espaço reservado
     asm("mov esp, pilha_topo");
+    // Executa o código do nucleo
     husis("");
+    // Loop infinito que desliga o processador nos intervalos
     while(-1)
     {
         asm("hlt");
@@ -36,57 +55,66 @@ void _start()
 
 void es_escreva_8(uint16_t porta, uint8_t valor)
 {
-    uint8_t tmp = valor;
-    asm("mov dx, [ebp + 8]");
-    asm("mov al, [ebp + 12]");
-    asm("out dx, al");
+    // Os parametros iniciam no EBP + 8 e vão crescendo de 4 em 4 bytes
+    uint8_t tmp = valor;                // Força o compilador a definir o EBP
+    asm("mov dx, [ebp + 8]");           // Porta
+    asm("mov al, [ebp + 12]");          // Valor
+    asm("out dx, al");                  // Emite um valor na porta
 }
 
 uint8_t es_leia_8(uint16_t porta)
 {
-    uint8_t tmp = 0;
-    asm("mov dx, [ebp + 8]");
-    asm("xor eax, eax");
-    asm("in al, dx");
-    asm("mov [ebp - 4], al");
+    // Os parametros iniciam no EBP + 8 e vão crescendo de 4 em 4 bytes
+    // Enquanto as variaveis iniciam em EBP -4 e vão diminuindo de 4 em 4 bytes
+    uint8_t tmp = 0;                    // Inicia a variavel EBP -4
+    asm("mov dx, [ebp + 8]");           // Le a variavel porta
+    asm("xor eax, eax");                // Limpa o registrador destino
+    asm("in al, dx");                   // Le um valor da porta
+    asm("mov [ebp - 4], al");           // Grava na variavel tmp
     return tmp;
 }
 
 void es_escreva_16(uint16_t porta, uint16_t valor)
 {
-    uint8_t tmp = valor;
-    asm("mov dx, [ebp + 8]");
-    asm("mov ax, [ebp + 12]");
-    asm("out dx, ax");
+    // Os parametros iniciam no EBP + 8 e vão crescendo de 4 em 4 bytes
+    uint8_t tmp = valor;                // Força o compilador a definir o EBP
+    asm("mov dx, [ebp + 8]");           // Porta
+    asm("mov ax, [ebp + 12]");          // Valor
+    asm("out dx, ax");                  // Emite um valor na porta
 }
 
 uint16_t es_leia_16(uint16_t porta)
 {
-    uint8_t tmp = 0;
-    asm("mov dx, [ebp + 8]");
-    asm("xor eax, eax");
-    asm("in ax, dx");
-    asm("mov [ebp - 4], ax");
+    // Os parametros iniciam no EBP + 8 e vão crescendo de 4 em 4 bytes
+    // Enquanto as variaveis iniciam em EBP -4 e vão diminuindo de 4 em 4 bytes
+    uint8_t tmp = 0;                    // Inicia a variavel EBP -4
+    asm("mov dx, [ebp + 8]");           // Le a variavel porta
+    asm("xor eax, eax");                // Limpa o registrador destino
+    asm("in ax, dx");                   // Le um valor da porta
+    asm("mov [ebp - 4], ax");           // Grava na variavel tmp
     return tmp;
 }
 
-uint16_t * _es_video_mem;
-uint16_t _es_video_largura;
-uint16_t _es_video_altura;
+// ES_VIDEO_H
+
+uint16_t * _es_video_mem;               // Ponteiro para o inicio da memoria de video
+uint16_t _es_video_largura;             // Largura da tela
+uint16_t _es_video_altura;              // Altura da tela
 
 void es_video_iniciar()
 {
-    _es_video_mem = (uint16_t *)0xB8000;
-    _es_video_altura = 25;
-    _es_video_largura = 80;
+    _es_video_mem = (uint16_t *)0xB8000;// Ponteiro da memória de video
+    _es_video_altura = 25;              // Altura da tela
+    _es_video_largura = 80;             // Largura da tela
 }
 
 void es_video_limpar(cor_t cor_texto, cor_t cor_fundo)
 {
-    for(tam_t y = 0; y < 80; y++)
+    for(tam_t y = 0; y < 25; y++)
     {
         for(tam_t x = 0; x < 80; x++)
         {
+            // Preenche a tela com espaços
             _es_video_mem[y * _es_video_largura + x] = (uint16_t)' ' | (uint16_t)((cor_texto | cor_fundo << 4) << 8);
         }
     }
@@ -94,7 +122,8 @@ void es_video_limpar(cor_t cor_texto, cor_t cor_fundo)
 
 void es_video_escreva_c(tam_t x, tam_t y, uint8_t c, cor_t cor_texto, cor_t cor_fundo)
 {
-    if(x >= _es_video_largura | y >= _es_video_altura) return;
+    if(x >= _es_video_largura | y >= _es_video_altura) 
+        return;                         // Cancela caso tente escrever fora da tela
     _es_video_mem[y * _es_video_largura + x] = (uint16_t)c | (uint16_t)((cor_texto | cor_fundo << 4) << 8);
 }
 
@@ -103,16 +132,18 @@ void es_video_escreva_c_repetido(tam_t x, tam_t y, tam_t qtd, uint8_t c, cor_t c
     tam_t xmax = 0;
     if(limite == ES_VIDEO_LIMITE_LINHA)
     {
+        // Limita a escrita a linha atual, interrompendo quando tentar escrever alem
         xmax = (y + 1) * _es_video_largura;
     }
     else if(limite == ES_VIDEO_LIMITE_TELA)
     {
+        // Limia a escrita ao final da tela, interrompendo quando tentar escrever alem
         xmax = _es_video_altura * _es_video_largura;
     }
     tam_t j = 0;
     for(tam_t i = y * _es_video_largura + x; i < xmax; i++)
     {
-        if(j >= qtd) break;
+        if(j >= qtd) break;             // Interrompe quando ultrapassa o limite
         _es_video_mem[i] = (uint16_t)c | (uint16_t)((cor_texto | cor_fundo << 4) << 8);
         j++;
     }
@@ -123,16 +154,18 @@ void es_video_escreva_txt(tam_t x, tam_t y, tam_t tam, txt_t txt, cor_t cor_text
     tam_t xmax = 0;
     if(limite == ES_VIDEO_LIMITE_LINHA)
     {
+        // Limita a escrita a linha atual, interrompendo quando tentar escrever alem
         xmax = (y + 1) * _es_video_largura;
     }
     else if(limite == ES_VIDEO_LIMITE_TELA)
     {
+        // Limia a escrita ao final da tela, interrompendo quando tentar escrever alem
         xmax =_es_video_altura * _es_video_largura;
     }
     tam_t j = 0;
     for(tam_t i = y * _es_video_largura + x; i < xmax; i++)
     {
-        if(txt[j] == 0) break;
+        if(txt[j] == 0) break;          // Interrompe quando chega ao fim do texto
         _es_video_mem[i] = (uint16_t)txt[j++] | (uint16_t)((cor_texto | cor_fundo << 4) << 8);
     }
 }

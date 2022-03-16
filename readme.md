@@ -1,18 +1,28 @@
 # Projeto HUSIS
 
+Sistema Operacional para PCs com processadores 386 ou superiores, este projeto está em fase inicial de protótipo.
 
-Com o objetivo de ser um projeto didatico e de simples entendimento, este projeto foi migrado do seu codigo original em Assembly para 8088, para C para 386, assim facilitando a leitura do codigo fonte.
+## Estrutura
 
+Este projeto está sendo feito de uma forma que seja facilmente portável para outros processadores, então todo o código do núcleo que é dependente de plataforma fica concentrado no arquivo es_(arquitetura).c, sendo o restante do código independente de plataforma.
 
-Este projeto tem como objetivo criar um Sistema Operacional simples que execute em maquinas antigas, ele será o resultado de várias inspirações, entre elas:
+O núcleo é dividido em módulos:
 
-- Windows 3.11 e MacOS 9 pela sua simplicidade na interface com o usuário.
-- macOS/OSX na sua forma de armazenar todos os arquivos de um aplicativo em sua pasta, tratando-a como um único arquivo.
-- HaikuOS pelos seus aplicativos e formatos de organizacao das bibliotecas
+- iut.c - Interface com o Usuario via Texto
+    - Responsável por gerar as telas e componentes na tela que o usuário interage
+- es_(arquitetura).c - Modulo de Entrada e Saida Nativo
+    - Armazena todo o código dependente de arquitetura do núcleo
+    - Onde fica o ponto inicial de execução do sistema operacional (Rotina _es_inicial)
+    - Responsável pela comunicação com o processador
+- sisarq.c - Sistema de Arquivos Virtual
+    - Fornece a API necessária para implementar os sistemas de arquivos
+- nucleo.c - Arquivo principal do núcleo, onde liga os demais módulos
 
-Mantendo o objetivo final original, pretendo adaptar o SmallerC para que possa emitir código 8088, assim podendo compilar para este processador, mas isso será feito em uma segunda etapa.
+## Ordem de execução ao ligar a maquina
 
-Acompanhe essa aventura via o [BLOG](http://humbertocsjr.dev.br)
+- es_(arquitetura).c - O Gerenciador de Inicialização (Boot Loader) carrega o Núcleo para a memória e inicia a execução pela rotina _start ou _es_inicial
+- nucleo.c - O Núcleo inicia o sistema de video para que possa mostrar mensagens para o usuário, na rotina Husis.
+- iut.c - Limpa a tela e é utilizado pelo nucleo para exibir as mensagens
 
 ## Licenciamento
 

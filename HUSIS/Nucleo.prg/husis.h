@@ -3,7 +3,7 @@
  * Copyright (c) 2022, Humberto Costa dos Santos Junior (humbertocsjr)
  * 
  * Historia:
- * - Versão inicial
+ * - 22.03.14 - Versão inicial
  */
 
 #ifndef HUSIS_H
