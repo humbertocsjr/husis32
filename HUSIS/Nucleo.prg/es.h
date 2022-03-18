@@ -17,5 +17,9 @@ uint8_t es_leia_8(uint16_t porta);
 void es_escreva_16(uint16_t porta, uint16_t valor);
 uint16_t es_leia_16(uint16_t porta);
 
- 
+posicao_t es_nucleo_primeira_pagina();
+posicao_t es_nucleo_ultima_pagina();
+void es_aplicar_areas_restritas(tam_t capacidade_paginas);
+tam_t es_mem_tamanho();
+
 #endif

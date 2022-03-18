@@ -5,3 +5,6 @@
  * Historia:
  * - 22.03.15 - Versão inicial
  */ 
+
+#include "husis.h"
+#include "sisarq.h"

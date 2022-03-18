@@ -4,10 +4,15 @@
  * 
  * Historia:
  * - 22.03.14 - Versão inicial
+ * - 22.03.16 - Lido os argumentos do Multiboot
  */
 
+#include "husis.h"
 #include "es.h" 
 #include "es_video.h"
+#include "mem.h"
+#include "processo.h"
+#include "es_multiboot.h"
 
 // Ponteiros do SmallerC Linker que apontam para o inicio e fim do binario
 asm("extrn __start_allcode__");
@@ -23,29 +28,39 @@ asm("   dd multiboot");
 asm("   dd __start_allcode__");
 asm("   dd __stop_alldata__");
 asm("   dd 0");
-asm("   dd _es_inicial");
+asm("   dd __start");
 
 // Reserva 16 KiB para a pilha
 asm("section .bss");
 asm("   rb 16384");
 asm("   pilha_topo:");
 
+
 // ES_H
 
 
-// Ponto de partida do executavel comum
-void _start()
-{
-    // Caso seja executado diretamente depois que o sistema operacional estiver carregado, ele não faz nada e encerra.
-}
+es_multiboot_dados_t * _es_multiboot;
+uint32_t _es_multiboot_assinatura;
 
 // Ponto de partida do executavel Multiboot
-void es_inicial()
+void _start()
+{
+    asm("cmp eax, 0x2badb002");
+    asm("jne __cancela");
+    asm("mov esp, pilha_topo");
+    asm("push eax");
+    asm("push ebx");
+    asm("call _es_inicial");
+    asm("__cancela:");
+}
+
+void es_inicial(uint32_t dados, uint32_t assinatura)
 {
     // Define a pilha para o espaço reservado
-    asm("mov esp, pilha_topo");
+    _es_multiboot = (es_multiboot_dados_t *) dados;
+    _es_multiboot_assinatura = assinatura;
     // Executa o código do nucleo
-    husis("");
+    husis((txt_t)_es_multiboot->argumentos);
     // Loop infinito que desliga o processador nos intervalos
     while(-1)
     {
@@ -95,20 +110,60 @@ uint16_t es_leia_16(uint16_t porta)
     return tmp;
 }
 
+
+posicao_t es_nucleo_primeira_pagina()
+{
+    uint32_t tmp = 0;
+    asm("mov dword [ebp -4], __start_allcode__");
+    tmp --;
+    tmp /= 4096;
+    return tmp;
+}
+
+posicao_t es_nucleo_ultima_pagina()
+{
+    uint32_t tmp = 0;
+    asm("mov dword [ebp -4], __stop_alldata__");
+    tmp++;
+    tmp /= 4096;
+    return tmp;
+}
+
+void es_aplicar_areas_restritas(tam_t capacidade_paginas)
+{
+    for(posicao_t i = 256; i < capacidade_paginas; i++)
+    {
+        if(i < 3840 & i <= (_es_multiboot->memoria_alta / 4))
+        {
+            mem_grava(i, PROCESSO_VAZIO, 0);
+        }
+        else if(i >= 4096 & i <= (_es_multiboot->memoria_alta / 4))
+        {
+            mem_grava(i, PROCESSO_VAZIO, 0);
+        }
+    }
+}
+
+tam_t es_mem_tamanho()
+{
+    return _es_multiboot->memoria_alta * 1024;
+}
+
+
 // ES_VIDEO_H
 
 uint16_t * _es_video_mem;               // Ponteiro para o inicio da memoria de video
 uint16_t _es_video_largura;             // Largura da tela
 uint16_t _es_video_altura;              // Altura da tela
 
-void es_video_iniciar()
+void es_video_inicia()
 {
     _es_video_mem = (uint16_t *)0xB8000;// Ponteiro da memória de video
     _es_video_altura = 25;              // Altura da tela
     _es_video_largura = 80;             // Largura da tela
 }
 
-void es_video_limpar(cor_t cor_texto, cor_t cor_fundo)
+void es_video_limpa(cor_t cor_texto, cor_t cor_fundo)
 {
     for(tam_t y = 0; y < 25; y++)
     {
@@ -149,7 +204,7 @@ void es_video_escreva_c_repetido(tam_t x, tam_t y, tam_t qtd, uint8_t c, cor_t c
     }
 }
 
-void es_video_escreva_txt(tam_t x, tam_t y, tam_t tam, txt_t txt, cor_t cor_texto, cor_t cor_fundo, uint8_t limite)
+tam_t es_video_escreva_txt(tam_t x, tam_t y, tam_t tam, txt_t txt, cor_t cor_texto, cor_t cor_fundo, uint8_t limite)
 {
     tam_t xmax = 0;
     if(limite == ES_VIDEO_LIMITE_LINHA)
@@ -163,11 +218,47 @@ void es_video_escreva_txt(tam_t x, tam_t y, tam_t tam, txt_t txt, cor_t cor_text
         xmax =_es_video_altura * _es_video_largura;
     }
     tam_t j = 0;
-    for(tam_t i = y * _es_video_largura + x; i < xmax; i++)
+    tam_t c = 0;
+    for(tam_t i = y * _es_video_largura + x; i < xmax & c < tam; i++)
     {
-        if(txt[j] == 0) break;          // Interrompe quando chega ao fim do texto
-        _es_video_mem[i] = (uint16_t)txt[j++] | (uint16_t)((cor_texto | cor_fundo << 4) << 8);
+        if(txt[j] == 0)
+        {
+            _es_video_mem[i] = (uint16_t)' ' | (uint16_t)((cor_texto | cor_fundo << 4) << 8);
+        }
+        else
+        {
+            _es_video_mem[i] = (uint16_t)txt[j++] | (uint16_t)((cor_texto | cor_fundo << 4) << 8);
+        }
+        c++;
     }
+    return j;
+}
+
+tam_t es_video_escreva_nro(tam_t x, tam_t y, tam_t tam, uint32_t nro, cor_t cor_texto, cor_t cor_fundo)
+{
+    uint32_t tmp = nro;
+    uint8_t digitos[20];
+    digitos[0] = 0;
+    posicao_t qtd = 0;
+    for(posicao_t i = 0; i < 20 & tmp > 0; i++)
+    {
+        digitos[qtd] = (uint8_t)(tmp % 10);
+        tmp = tmp / 10;
+        qtd++;
+    }
+    if(qtd == 0) qtd++;
+    for(posicao_t i = 0; i < tam; i++)
+    {
+        if(i < qtd)
+        {
+            es_video_escreva_c(x + i, y, (uint8_t)'0' + digitos[qtd - i - 1], cor_texto, cor_fundo);
+        }
+        else
+        {
+            es_video_escreva_c(x + i, y, ' ', cor_texto, cor_fundo);
+        }
+    }
+    return qtd;
 }
 
 tam_t es_video_largura()
@@ -182,7 +273,7 @@ tam_t es_video_altura()
 
 void es_video_oculta_cursor()
 {
-    es_escreva_8(0x3d4, 0xb);
+    es_escreva_8(0x3d4, 0xa);
     es_escreva_8(0x3d5, 0x20);
 }
 

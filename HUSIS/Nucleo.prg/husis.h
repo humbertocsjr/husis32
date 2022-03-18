@@ -4,6 +4,7 @@
  * 
  * Historia:
  * - 22.03.14 - Versão inicial
+ * - 22.03.16 - Comando de alteracao do percentual da tela de progresso
  */
 
 #ifndef HUSIS_H
@@ -17,11 +18,21 @@ typedef unsigned int uint32_t;
 typedef int int32_t;
 typedef unsigned int size_t;
 
+typedef unsigned char byte_t;
+typedef unsigned char processo_t;
 typedef unsigned int tam_t;
+typedef unsigned int posicao_t;
 typedef char * txt_t;
 typedef unsigned char cor_t;
+typedef unsigned short status_t;
 
 #define OK 0
+#define IGUAL 0
+#define ERRO_ACESSO_NEGADO 1
+#define ERRO_NAO_ENCONTRADO 2
+#define DIFERENTE 3
+#define ERRO_DIFERENTE 3
+#define ERRO_ESTOURO_DE_CAPACIDADE 10
 
 #define COR_PRETO 0
 #define COR_AZUL 1
@@ -40,5 +51,10 @@ typedef unsigned char cor_t;
 #define COR_MARROM_CLARO 14
 #define COR_BRANCO 15
 
+
+void husis_progresso(txt_t texto1, txt_t texto2);
+void husis_progresso_altera(int8_t percentual);
+
+#include "config.h"
 
 #endif

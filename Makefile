@@ -17,13 +17,15 @@ all:
 	@minixfs mkdir Imagens/Disquete.img HUSIS
 	@minixfs mkdir Imagens/Disquete.img HUSIS/Nucleo.prg
 	@minixfs add Imagens/Disquete.img HUSIS/Nucleo.prg/prog.elf HUSIS/Nucleo.prg/prog.elf
+	@minixfs add Imagens/Disquete.img HUSIS/Nucleo.prg/prog.rot HUSIS/Nucleo.prg/prog.rot
+	@minixfs add Imagens/Disquete.img HUSIS/Nucleo.prg/prog.bin HUSIS/Nucleo.prg/prog.bin
 	@rm -Rf Temp/*
 
 qemu: all
-	@qemu-system-i386 Imagens/Disco.iso
+	@qemu-system-i386 -m 32 Imagens/Disco.iso
 
 disquete: all
-	@qemu-system-i386 -fda Imagens/Disquete.img 
+	@qemu-system-i386 -m 32 -fda Imagens/Disquete.img 
 	
 86box: all
 	@cd ../86Box && ./86Box.AppImage

@@ -1,3 +1,21 @@
-all:
-	smlrcc -asm n2f -aout -o prog.rot es_386pc.c nucleo.c iut.c sisarq.c
-	smlrcc -asm n2f -elf -origin 0x100000 -o prog.elf es_386pc.c nucleo.c iut.c sisarq.c
+ARQUIVOS =  es_386pc.c nucleo.c iut.c sisarq.c mem.c processo.c dispositivo.c txt.c disquete.c ide.c
+
+all: ram64
+
+ram64:
+	cp config64mib.h config.h
+	make nucleo
+ram128:
+	cp config128mib.h config.h
+	make nucleo
+ram256:
+	cp config256mib.h config.h
+	make nucleo
+ram4096:
+	cp config4gib.h config.h
+	make nucleo
+
+nucleo:	
+	smlrcc -asm n2f -aout -o prog.rot $(ARQUIVOS)
+	smlrcc -asm n2f -flat32 -origin 0x100000 -o prog.bin $(ARQUIVOS)
+	smlrcc -asm n2f -elf -origin 0x100000 -o prog.elf $(ARQUIVOS)

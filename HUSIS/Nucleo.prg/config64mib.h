@@ -1,0 +1,8 @@
+/*
+ * NAO ALTERAR DIRETAMENTE O ARQUIVO config.h
+ */
+#ifndef CONFIG_H
+#define CONFIG_H
+#define MEM_TOTAL_PAGINAS 16384
+#define DISPOSITIVO_TOTAL 72
+#endif
