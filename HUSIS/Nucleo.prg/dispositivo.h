@@ -11,6 +11,18 @@
 
 #include "husis.h"
 
+/*
+ * Dentro do nucleo durante a inicializacao usar a macro DISPOSITIVO INICIA:
+ * 
+ *     DISPOSITIVO_INICIA(ide, "Erro ao carregar o Controlador IDE");
+ * 
+ * Não precisa declarar a função ide_inicia(), ela é declarada automaticamente.
+ */
+
+#define DISPOSITIVO_INICIA(disp, erro) extern status_t disp##_inicia(); if((ret = disp##_inicia()) != OK) husis_progresso_erro(erro, ret)
+
+
+
 #define DISPOSITIVO_TAM_NOME 32
 #define DISPOSITIVO_TAM_CONFIG 32
 
@@ -33,6 +45,7 @@ typedef struct dispositivo dispositivo_t;
 
 #define DISPOSITIVO_NAO_ENCONTRADO 0
 
+
 void dispositivo_inicia();
 posicao_t dispositivo_registra(txt_t nome, uint8_t tipo, tam_t tamanho_bloco);
 posicao_t dispositivo_busca(txt_t nome);
@@ -49,6 +62,6 @@ status_t dispositivo_remove(posicao_t dispositivo);
 tam_t dispositivo_quantidade();
 
 
-void dispositivo_disco_inicia();
+status_t dispositivo_disco_inicia();
 
 #endif

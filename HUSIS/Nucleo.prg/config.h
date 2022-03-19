@@ -3,6 +3,6 @@
  */
 #ifndef CONFIG_H
 #define CONFIG_H
-#define MEM_TOTAL_PAGINAS 16384
-#define DISPOSITIVO_TOTAL 72
+#define MEM_TOTAL_PAGINAS 65536
+#define DISPOSITIVO_TOTAL 512
 #endif

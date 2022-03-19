@@ -13,16 +13,6 @@
 dispositivo_t _dispositivos[DISPOSITIVO_TOTAL];
 
 
-// DISPOSITIVOS DE DISCO
-
-#include "disquete.h"
-#include "ide.h"
-
-void dispositivo_disco_inicia()
-{
-    disquete_inicia();
-    ide_inicia();
-}
 
 // GESTOR DE DISPOSITIVOS
 
@@ -88,18 +78,21 @@ status_t dispositivo_altera_leia(posicao_t dispositivo, tam_t (* leia_bloco)(byt
 {
     if(dispositivo_status(dispositivo) != OK) return ERRO_NAO_ENCONTRADO;
     _dispositivos[dispositivo].leia_bloco = leia_bloco;
+    return OK;
 }
 
 status_t dispositivo_altera_grava(posicao_t dispositivo, tam_t (* grava_bloco)(byte_t * destino, posicao_t posicao, tam_t quantidade))
 {
     if(dispositivo_status(dispositivo) != OK) return ERRO_NAO_ENCONTRADO;
     _dispositivos[dispositivo].grava_bloco = grava_bloco;
+    return OK;
 }
 
 status_t dispositivo_altera_tamanho(posicao_t dispositivo, tam_t tamanho)
 {
     if(dispositivo_status(dispositivo) != OK) return ERRO_NAO_ENCONTRADO;
     _dispositivos[dispositivo].tamanho = tamanho;
+    return OK;
 }
 
 status_t dispositivo_altera_config(posicao_t dispositivo, posicao_t posicao, posicao_t valor)
@@ -107,6 +100,7 @@ status_t dispositivo_altera_config(posicao_t dispositivo, posicao_t posicao, pos
     if(dispositivo_status(dispositivo) != OK) return ERRO_NAO_ENCONTRADO;
     if(posicao >= DISPOSITIVO_TAM_CONFIG) return ERRO_ESTOURO_DE_CAPACIDADE;
     _dispositivos[dispositivo].config[32] = valor;
+    return OK;
 }
 
 status_t dispositivo_leia_config(posicao_t dispositivo, posicao_t posicao, posicao_t * destino)
@@ -114,12 +108,14 @@ status_t dispositivo_leia_config(posicao_t dispositivo, posicao_t posicao, posic
     if(dispositivo_status(dispositivo) != OK) return ERRO_NAO_ENCONTRADO;
     if(posicao >= DISPOSITIVO_TAM_CONFIG) return ERRO_ESTOURO_DE_CAPACIDADE;
     destino = _dispositivos[dispositivo].config[32];
+    return OK;
 }
 
 status_t dispositivo_tamanho(posicao_t dispositivo, tam_t * destino)
 {
     if(dispositivo_status(dispositivo) != OK) return ERRO_NAO_ENCONTRADO;
     destino = _dispositivos[dispositivo].tamanho;
+    return OK;
 }
 
 tam_t dispositivo_leia_bloco(posicao_t dispositivo, byte_t * destino, posicao_t posicao, tam_t quantidade)
@@ -141,6 +137,7 @@ status_t dispositivo_remove(posicao_t dispositivo)
     if(dispositivo_status(dispositivo) != OK) return ERRO_NAO_ENCONTRADO;
     _dispositivos[dispositivo].tipo = DISPOSITIVO_TIPO_INDEFINIDO;
     _dispositivos[dispositivo].nome[0] = 0;
+    return OK;
 }
 
 

@@ -1,6 +1,6 @@
-ARQUIVOS =  es_386pc.c nucleo.c iut.c sisarq.c mem.c processo.c dispositivo.c txt.c disquete.c ide.c
+ARQUIVOS =  es_386pc.c nucleo.c iut.c sisarq.c mem.c processo.c dispositivo.c txt.c disco.c disco/disquete.c disco/ide.c
 
-all: ram64
+all: ram256
 
 ram64:
 	cp config64mib.h config.h

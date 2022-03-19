@@ -10,6 +10,19 @@
 #ifndef HUSIS_H
 #define HUSIS_H
 
+/*
+ * Exemplo de uso do status_t:
+ * 
+ * status_t funcao()
+ * {
+ *     status_t ret = OK;
+ *     VALIDA(comando_que_retorna_status());
+ *     return ret;
+ * }
+ */
+
+#define VALIDA(comando) if((ret = comando) != OK) return ret
+
 typedef unsigned char uint8_t;
 typedef char int8_t;
 typedef unsigned short uint16_t;
@@ -53,6 +66,7 @@ typedef unsigned short status_t;
 
 
 void husis_progresso(txt_t texto1, txt_t texto2);
+void husis_progresso_erro(txt_t erro, status_t codigo);
 void husis_progresso_altera(int8_t percentual);
 
 #include "config.h"

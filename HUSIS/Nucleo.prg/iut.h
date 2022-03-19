@@ -37,6 +37,7 @@ struct iut_controle
     txt_t texto;
     uint32_t valor;
     iut_opcoes_t opcoes;
+    iut_opcoes_t exibicao;
     void (*ao_entrar_em_foco)(struct iut_controle * controle);
     void (*ao_sair_de_foco)(struct iut_controle * controle);
     void (*ao_pressionar_tela)(struct iut_controle * controle);
@@ -54,7 +55,7 @@ typedef struct iut_controle iut_controle_t;
 #define IUT_POSICAO_DINAMICA_CONTINUA 0
 #define IUT_POSICAO_DINAMICA_ABAIXO 1
 
-#define IUT_TIPO_CAIXA 0
+#define IUT_TIPO_TELA 0
 #define IUT_TIPO_JANELA 1
 #define IUT_TIPO_ROTULO 2
 #define IUT_TIPO_ROTULO_NRO 3
@@ -64,6 +65,9 @@ typedef struct iut_controle iut_controle_t;
 #define IUT_BOTAO_FECHAR 1
 #define IUT_BOTAO_OK 2
 #define IUT_BOTAO_CANCELAR 4
+
+#define IUT_EXIBICAO_VISIVEL 0
+#define IUT_EXIBICAO_OCULTO 1
 
 void iut_inicia(); 
 
@@ -75,8 +79,12 @@ void iut_altera_texto(iut_controle_t * controle, txt_t texto);
 void iut_altera_valor(iut_controle_t * controle, posicao_t valor);
 void iut_altera_posicao(iut_controle_t * controle, posicao_t x, posicao_t y);
 
+void iut_exibe(iut_controle_t * controle);
+void iut_oculta(iut_controle_t * controle);
+
 status_t iut_nova_janela(iut_controle_t * controle, posicao_t x, posicao_t y, posicao_t largura, posicao_t altura, txt_t titulo, iut_opcoes_t botoes);
 void iut_novo_rotulo(iut_controle_t * controle, posicao_t x, posicao_t y, tam_t largura, txt_t texto);
+void iut_novo_rotulo_nro(iut_controle_t * controle, posicao_t x, posicao_t y, tam_t largura, posicao_t valor);
 void iut_novo_progresso(iut_controle_t * controle, posicao_t x, posicao_t y, tam_t largura, posicao_t valor);
 
 void iut_zera_controle(iut_controle_t * controle);
