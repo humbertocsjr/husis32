@@ -2,6 +2,10 @@
 
 Sistema Operacional para PCs com processadores 386 ou superiores, este projeto está em fase inicial de protótipo.
 
+## Download
+
+[Link para Download das Imagens Bootaveis](http://cloud.humbertocsjr.dev.br:3000/humbertocsjr/husis/releases)
+
 ## Estrutura
 
 Este projeto está sendo feito de uma forma que seja facilmente portável para outros processadores, então todo o código do núcleo que é dependente de plataforma fica concentrado no arquivo es_(arquitetura).c, sendo o restante do código independente de plataforma.
