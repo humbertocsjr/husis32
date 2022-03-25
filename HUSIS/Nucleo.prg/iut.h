@@ -49,6 +49,31 @@ struct iut_controle
 
 typedef struct iut_controle iut_controle_t;
 
+
+struct iut_pacote
+{
+    posicao_t acao;
+    iut_controle_t * controle;
+    iut_controle_t * acima;
+    txt_t texto;
+    posicao_t valor;
+    posicao_t x;
+    posicao_t y;
+    posicao_t largura;
+    posicao_t altura;
+    iut_opcoes_t opcoes;
+};
+
+typedef struct iut_pacote iut_pacote_t;
+
+#define IUT_ACAO_ALTERA_VALOR 1
+#define IUT_ACAO_ALTERA_TEXTO 2
+#define IUT_ACAO_REDESENHA 3
+#define IUT_ACAO_REDESENHA_TELA 4
+#define IUT_ACAO_NOVA_JANELA 10
+#define IUT_ACAO_NOVO_ROTULO 11
+#define IUT_ACAO_NOVO_PROGRESSO 12
+
 #define IUT_ORGANIZACAO_FIXA 0;
 #define IUT_ORGANIZACAO_DINAMICA 1;
 

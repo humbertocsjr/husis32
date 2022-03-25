@@ -1,4 +1,4 @@
-ARQUIVOS =  es_386pc.c nucleo.c iut.c sisarq.c mem.c processo.c dispositivo.c txt.c disco.c disco/disquete.c disco/ide.c
+ARQUIVOS =  es_386pc.c es_386pc_int.c nucleo.c iut.c sisarq.c mem.c processo.c dispositivo.c txt.c disco.c disco/disquete.c disco/ide.c es/teclado.c es/interface.c es.c
 
 all: ram256
 

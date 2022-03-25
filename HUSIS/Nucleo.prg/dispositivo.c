@@ -74,14 +74,14 @@ status_t dispositivo_status(posicao_t dispositivo)
     return ERRO_NAO_ENCONTRADO;
 }
 
-status_t dispositivo_altera_leia(posicao_t dispositivo, tam_t (* leia_bloco)(byte_t * destino, posicao_t posicao, tam_t quantidade))
+status_t dispositivo_altera_leia(posicao_t dispositivo, tam_t (* leia_bloco)(posicao_t disco, byte_t * destino, posicao_t posicao, tam_t quantidade))
 {
     if(dispositivo_status(dispositivo) != OK) return ERRO_NAO_ENCONTRADO;
     _dispositivos[dispositivo].leia_bloco = leia_bloco;
     return OK;
 }
 
-status_t dispositivo_altera_grava(posicao_t dispositivo, tam_t (* grava_bloco)(byte_t * destino, posicao_t posicao, tam_t quantidade))
+status_t dispositivo_altera_grava(posicao_t dispositivo, tam_t (* grava_bloco)(posicao_t disco, byte_t * destino, posicao_t posicao, tam_t quantidade))
 {
     if(dispositivo_status(dispositivo) != OK) return ERRO_NAO_ENCONTRADO;
     _dispositivos[dispositivo].grava_bloco = grava_bloco;
@@ -122,14 +122,14 @@ tam_t dispositivo_leia_bloco(posicao_t dispositivo, byte_t * destino, posicao_t 
 {
     if(dispositivo_status(dispositivo) != OK) return ERRO_NAO_ENCONTRADO;
     if((posicao_t)_dispositivos[dispositivo].leia_bloco == 0) return ERRO_NAO_ENCONTRADO;
-    return _dispositivos[dispositivo].leia_bloco(destino, posicao, quantidade);
+    return _dispositivos[dispositivo].leia_bloco(dispositivo, destino, posicao, quantidade);
 }
 
 tam_t dispositivo_grava_bloco(posicao_t dispositivo, byte_t * origem, posicao_t posicao, tam_t quantidade)
 {
     if(dispositivo_status(dispositivo) != OK) return ERRO_NAO_ENCONTRADO;
     if((posicao_t)_dispositivos[dispositivo].grava_bloco == 0) return ERRO_NAO_ENCONTRADO;
-    return _dispositivos[dispositivo].grava_bloco(origem, posicao, quantidade);
+    return _dispositivos[dispositivo].grava_bloco(dispositivo, origem, posicao, quantidade);
 }
 
 status_t dispositivo_remove(posicao_t dispositivo)

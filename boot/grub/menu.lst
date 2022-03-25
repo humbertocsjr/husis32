@@ -5,5 +5,5 @@ default 0
 
 title HUSIS
 root (fd0)
-kernel --type=multiboot /HUSIS/Nucleo.prg/prog.elf raiz=disquete0_1440
+kernel --type=multiboot /HUSIS/Nucleo.prg/prog.elf raiz=Disquete0_1440
 

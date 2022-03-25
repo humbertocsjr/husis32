@@ -18,6 +18,7 @@
 
 iut_controle_t _iut_tela;
 
+cor_t _iut_estilo_tela_fundo = COR_PRETO;
 cor_t _iut_estilo_borda_janela = COR_CIANO;
 cor_t _iut_estilo_titulo_janela = COR_CIANO_CLARO;
 cor_t _iut_estilo_fundo = COR_PRETO;
@@ -30,7 +31,7 @@ uint8_t _iut_exibe_menu_principal = 0;
 
 void iut_inicia()
 {
-    es_video_limpa(COR_BRANCO, COR_PRETO);
+    es_video_limpa(_iut_estilo_fundo, _iut_estilo_fundo);
     es_video_oculta_cursor();
     iut_zera_controle(&_iut_tela);
     _iut_tela.tipo = IUT_TIPO_TELA;
@@ -60,7 +61,7 @@ void iut_exibe_menu_principal()
     iut_redesenha_tela();
 }
 
-void iut_exibe_menu_principal()
+void iut_oculta_menu_principal()
 {
     _iut_exibe_menu_principal = 0;
     iut_redesenha_tela();
@@ -120,7 +121,7 @@ void iut_redesenha(iut_controle_t * controle)
 {
     if(controle == &_iut_tela)
     {
-        es_video_limpa();
+        es_video_limpa(_iut_estilo_tela_fundo, _iut_estilo_tela_fundo);
         iut_redesenha_menus(0);
         iut_redesenha_conteudo(controle);
     }

@@ -34,13 +34,15 @@ Todo código fonte deste projeto é distribuido através da licença BSD, confor
 
 Existem outros projetos incluidos em sua forma de código fonte ou binária e estes são distribuídos conforme suas respectivas licenças:
 - Existem binários do GRUB Legacy no diretório boot, apenas é distribuído para facilitar como uma alternativa possível para boot, não sendo sua única forma
-- Existem projetos dos compiladores que são usados por este projeto, estão disponibilizados no diretório Desenvolvimento
+- Os diretorios dentro de Desenvolvimento e Programas, são projetos independentes, apenas armazenados na arvore principal para facilitar a compilação.
 
 ## Recursos implementados
 
 - Novo nucleo com inicialização Multiboot
 - Separação do código dependente de plataforma no módulo "es" (Entrada e Saída), podendo ser substituído por outros módulos conforme a plataforma destino
 - Protótipo da Interface com o Usuário
+- Arvore de Dispositivos
+- Implementado prototipo da Multitarefa
 
 ## Recursos previstos
 

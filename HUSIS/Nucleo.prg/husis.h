@@ -23,6 +23,8 @@
 
 #define VALIDA(comando) if((ret = comando) != OK) return ret
 
+#define ENTRE(valor, min, max) (valor >= min & valor <= max)
+
 typedef unsigned char uint8_t;
 typedef char int8_t;
 typedef unsigned short uint16_t;
@@ -32,7 +34,7 @@ typedef int int32_t;
 typedef unsigned int size_t;
 
 typedef unsigned char byte_t;
-typedef unsigned char processo_t;
+typedef unsigned int processo_t;
 typedef unsigned int tam_t;
 typedef unsigned int posicao_t;
 typedef char * txt_t;
@@ -45,6 +47,8 @@ typedef unsigned short status_t;
 #define ERRO_NAO_ENCONTRADO 2
 #define DIFERENTE 3
 #define ERRO_DIFERENTE 3
+#define ERRO_ARGUMENTO_INVALIDO 4
+#define ERRO_DADOS_CORROMPIDOS 5
 #define ERRO_ESTOURO_DE_CAPACIDADE 10
 
 #define COR_PRETO 0

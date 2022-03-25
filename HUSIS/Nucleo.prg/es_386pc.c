@@ -5,6 +5,7 @@
  * Historia:
  * - 22.03.14 - Versão inicial
  * - 22.03.16 - Lido os argumentos do Multiboot
+ * - 22.03.23 - Implementado Multitarefa, GDT e IDT
  */
 
 #include "husis.h"
@@ -13,6 +14,7 @@
 #include "mem.h"
 #include "processo.h"
 #include "es_multiboot.h"
+#include "es_int.h"
 
 // Ponteiros do SmallerC Linker que apontam para o inicio e fim do binario
 asm("extrn __start_allcode__");
@@ -38,9 +40,87 @@ asm("   pilha_topo:");
 
 // ES_H
 
+#pragma pack(push, 1)
 
+struct es_gdt_item
+{
+    uint8_t limite0;
+    uint8_t limite1;
+    uint8_t base0;
+    uint8_t base1;
+    uint8_t base2;
+    uint8_t acesso;
+    uint8_t limite2;
+    uint8_t base3;
+};
+
+typedef struct es_gdt_item es_gdt_item_t;
+
+struct es_gdt_ponteiro
+{
+    uint16_t limite;
+    uint32_t base;
+};
+typedef struct es_gdt_ponteiro es_gdt_ponteiro_t;
+
+#define ES_GDT_TOTAL 5
+
+struct es_idt_item
+{
+    uint16_t base0;
+    uint16_t seletor;
+    uint8_t zero;
+    uint8_t opcoes;
+    uint16_t base1;
+};
+typedef struct es_idt_item es_idt_item_t;
+
+struct es_idt_ponteiro
+{
+    uint16_t limite;
+    uint32_t base;
+};
+typedef struct es_idt_ponteiro es_idt_ponteiro_t;
+
+#define ES_IDT_TOTAL 256
+
+#define ES_IDT_PADRAO(int) extern void _es_int##int(); es_idt_grava(int, &_es_int##int, 0x8, 0x8e)
+
+struct es_registradores
+{
+    uint32_t gs;
+    uint32_t fs;
+    uint32_t es;
+    uint32_t ds;
+    uint32_t edi;
+    uint32_t esi;
+    uint32_t ebp;
+    uint32_t inutilizado;
+    uint32_t ebx;
+    uint32_t edx;
+    uint32_t ecx;
+    uint32_t eax;
+    uint32_t interrupcao;
+    uint32_t codigo_erro;
+    uint32_t eip;
+    uint32_t cs;
+    uint32_t eflags;
+    uint32_t esp;
+    uint32_t ss;
+};
+
+typedef struct es_registradores es_registradores_t;
+
+#pragma pack(pop)
+
+es_int_registro_t _es_int_manipuladores[ES_IDT_TOTAL];
+es_gdt_item_t _es_gdt[ES_GDT_TOTAL];
+es_gdt_ponteiro_t _es_gdt_ponteiro;
+es_idt_item_t _es_idt[ES_IDT_TOTAL];
+es_idt_ponteiro_t _es_idt_ponteiro;
 es_multiboot_dados_t * _es_multiboot;
 uint32_t _es_multiboot_assinatura;
+
 
 // Ponto de partida do executavel Multiboot
 void _start()
@@ -66,6 +146,195 @@ void es_inicial(uint32_t dados, uint32_t assinatura)
     {
         asm("hlt");
     }
+}
+
+void es_gdt_grava(posicao_t posicao, posicao_t base, posicao_t limite, uint8_t acesso, uint8_t opcoes)
+{
+    _es_gdt[posicao].base0   = (uint8_t)base & 0xff;
+    _es_gdt[posicao].base1   = (uint8_t)(base >> 8) & 0xff;
+    _es_gdt[posicao].base2   = (uint8_t)(base >> 16) & 0xff;
+    _es_gdt[posicao].base3   = (uint8_t)(base >> 24) & 0xff;
+    _es_gdt[posicao].limite0 = (uint8_t)limite & 0xff;
+    _es_gdt[posicao].limite1 = (uint8_t)(limite >> 8) & 0xff;
+    _es_gdt[posicao].limite2 = (uint8_t)((limite >> 16) & 0x0f) | ((opcoes << 4) & 0xf0 );
+    _es_gdt[posicao].acesso  = acesso;
+}
+
+void es_idt_grava(posicao_t posicao, posicao_t base, uint16_t seletor, uint8_t opcoes)
+{
+    _es_idt[posicao].base0   = base & 0xffff;
+    _es_idt[posicao].base1   = (base >> 16) & 0xffff;
+    _es_idt[posicao].seletor = seletor;
+    _es_idt[posicao].zero    = 0;
+    _es_idt[posicao].opcoes  = opcoes /*| 0x60*/;
+}
+
+void es_int_inicia()
+{
+    
+    for (posicao_t i = 0; i < ES_GDT_TOTAL; i ++)
+    {
+        es_gdt_grava(i, 0,0,0,0);
+    }
+    
+    es_gdt_grava(1, 0, 0xFFFFFFFF, 0x9a, 0xc);
+    es_gdt_grava(2, 0, 0xFFFFFFFF, 0x92, 0xc);
+    es_gdt_grava(3, 0, 0xFFFFFFFF, 0xfa, 0xc);
+    es_gdt_grava(4, 0, 0xFFFFFFFF, 0xf2, 0xc);
+    
+    _es_gdt_ponteiro.base = (uint32_t)&_es_gdt;
+    _es_gdt_ponteiro.limite = (ES_GDT_TOTAL * sizeof(es_gdt_item_t)) - 1;
+    
+    asm("lgdt [__es_gdt_ponteiro]");
+    asm("mov ax, 0x10");
+    asm("mov ds, ax");
+    asm("mov es, ax");
+    asm("mov fs, ax");
+    asm("mov gs, ax");
+    asm("mov ss, ax");
+    asm("jmp 0x8:es_gdt_continua");
+    asm("es_gdt_continua:");
+    
+    extern void _es_intextra();
+    for (posicao_t i = 0; i < ES_IDT_TOTAL; i ++)
+    {
+         es_idt_grava(i, &_es_intextra, 0x8, 0x8e);
+         _es_int_manipuladores[i].interrupcao = i;
+         _es_int_manipuladores[i].manipulador = 0;
+    }
+    
+    ES_IDT_PADRAO(0);
+    ES_IDT_PADRAO(1);
+    ES_IDT_PADRAO(2);
+    ES_IDT_PADRAO(3);
+    ES_IDT_PADRAO(4);
+    ES_IDT_PADRAO(5);
+    ES_IDT_PADRAO(6);
+    ES_IDT_PADRAO(7);
+    ES_IDT_PADRAO(8);
+    ES_IDT_PADRAO(9);
+    ES_IDT_PADRAO(10);
+    ES_IDT_PADRAO(11);
+    ES_IDT_PADRAO(12);
+    ES_IDT_PADRAO(13);
+    ES_IDT_PADRAO(14);
+    ES_IDT_PADRAO(15);
+    ES_IDT_PADRAO(16);
+    ES_IDT_PADRAO(17);
+    ES_IDT_PADRAO(18);
+    ES_IDT_PADRAO(19);
+    ES_IDT_PADRAO(20);
+    ES_IDT_PADRAO(21);
+    ES_IDT_PADRAO(22);
+    ES_IDT_PADRAO(23);
+    ES_IDT_PADRAO(24);
+    ES_IDT_PADRAO(25);
+    ES_IDT_PADRAO(26);
+    ES_IDT_PADRAO(27);
+    ES_IDT_PADRAO(28);
+    ES_IDT_PADRAO(29);
+    ES_IDT_PADRAO(30);
+    ES_IDT_PADRAO(31);
+    ES_IDT_PADRAO(32);
+    ES_IDT_PADRAO(33);
+    ES_IDT_PADRAO(34);
+    ES_IDT_PADRAO(35);
+    ES_IDT_PADRAO(36);
+    ES_IDT_PADRAO(37);
+    ES_IDT_PADRAO(38);
+    ES_IDT_PADRAO(39);
+    ES_IDT_PADRAO(40);
+    ES_IDT_PADRAO(41);
+    ES_IDT_PADRAO(42);
+    ES_IDT_PADRAO(43);
+    ES_IDT_PADRAO(44);
+    ES_IDT_PADRAO(45);
+    ES_IDT_PADRAO(46);
+    ES_IDT_PADRAO(47);
+    ES_IDT_PADRAO(48);
+    ES_IDT_PADRAO(49);
+    
+    _es_idt_ponteiro.base = (uint32_t)&_es_idt;
+    _es_idt_ponteiro.limite = (ES_IDT_TOTAL * sizeof(es_idt_item_t)) - 1;
+    
+    asm("lidt [__es_idt_ponteiro]");
+    
+    // Remapeia o as IRQs do PIT de 0-15 para 32-47 para evitar cruzamentos com as interrupcoes do processador, o que geraria erros.
+    es_escreva_8(0x20, 0x11);
+    es_escreva_8(0xA0, 0x11);
+    es_escreva_8(0x21, 0x20);
+    es_escreva_8(0xA1, 0x28);
+    es_escreva_8(0x21, 0x04);
+    es_escreva_8(0xA1, 0x02);
+    es_escreva_8(0x21, 0x01);
+    es_escreva_8(0xA1, 0x01);
+    es_escreva_8(0x21, 0x0);
+    es_escreva_8(0xA1, 0x0);
+    
+    // Define o timer do computador
+    es_escreva_8(0x43, 0x36);
+    posicao_t timer = 1193180 / 50; // 50 hz
+    es_escreva_8(0x40, timer & 0xff);
+    es_escreva_8(0x40, (timer >> 8) & 0xff);
+    
+    asm("sti");
+}
+
+posicao_t _es_contador = 0;
+
+posicao_t _es_multitarefa_ss = 0;
+posicao_t _es_multitarefa_esp = 0;
+
+void es_processar_int(es_registradores_t regs)
+{
+    if((posicao_t)_es_int_manipuladores[regs.interrupcao].manipulador > 0)
+    {
+       _es_int_manipuladores[regs.interrupcao].manipulador(regs.eax, regs.ebx, regs.ecx, regs.edx, regs.interrupcao, regs.codigo_erro); 
+    }
+    if(regs.interrupcao == 32)
+    {
+        // Timer
+        es_video_escreva_nro(0,0,10,regs.interrupcao, COR_PRETO, COR_BRANCO);
+        es_video_escreva_nro(10,0,10,regs.codigo_erro, COR_PRETO, COR_BRANCO);
+        es_video_escreva_nro(20,0,10,_es_contador, COR_PRETO, COR_BRANCO);
+        extern processo_t _processo_atual;
+        extern processo_dados_t _processos[PROCESSO_TOTAL];
+        processo_t proximo = processo_proximo_processo();
+        if(proximo != _processo_atual)
+        {
+            asm("cli");
+            asm("xor eax, eax");
+            asm("mov ax, ss");
+            asm("mov [__es_multitarefa_ss], eax");
+            asm("mov eax, esp");
+            asm("mov [__es_multitarefa_esp], eax");
+            _processos[_processo_atual].seletor = _es_multitarefa_ss;
+            _processos[_processo_atual].pilha = _es_multitarefa_esp;
+            
+            _es_multitarefa_ss = _processos[proximo].seletor;
+            _es_multitarefa_esp = _processos[proximo].pilha;
+            _processo_atual = proximo;
+            asm("mov eax, [__es_multitarefa_ss]");
+            asm("mov ss, ax");
+            asm("mov eax, [__es_multitarefa_esp]");
+            asm("mov esp, eax");
+            asm("sti");
+        }
+        _es_contador++;
+    }
+    if(regs.interrupcao >= 40)
+    {
+        es_escreva_8(0xa0, 0x20);
+    }
+    es_escreva_8(0x20, 0x20);
+}
+
+status_t es_int_altera(posicao_t interrupcao, void (* manipulador)(posicao_t reg1, posicao_t reg2, posicao_t reg3, posicao_t reg4, posicao_t interrupcao, posicao_t codigo_erro))
+{
+    if(interrupcao >= ES_IDT_TOTAL)
+        return ERRO_ESTOURO_DE_CAPACIDADE;
+    _es_int_manipuladores[interrupcao].manipulador = manipulador;
+    return OK;
 }
 
 void es_escreva_8(uint16_t porta, uint8_t valor)
@@ -131,6 +400,12 @@ posicao_t es_nucleo_ultima_pagina()
 
 void es_aplicar_areas_restritas(tam_t capacidade_paginas)
 {
+    // Monta o primeiro MB (Posição 32KiB ate 640KiB)
+    for(posicao_t i = 8; i < 160; i++)
+    {
+        mem_grava(i, PROCESSO_VAZIO, 0);
+    }
+    // Monta o restante da memoria (Pulando entre 15MiB e 16MiB)
     for(posicao_t i = 256; i < capacidade_paginas; i++)
     {
         if(i < 3840 & i <= (_es_multiboot->memoria_alta / 4))

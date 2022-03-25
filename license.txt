@@ -1,6 +1,3 @@
-New BSD License
----------------
-
 Copyright © 2022, Humberto Costa dos Santos Junior (humbertocsjr)
 (http://humbertocsjr.dev.br)
 All rights reserved.

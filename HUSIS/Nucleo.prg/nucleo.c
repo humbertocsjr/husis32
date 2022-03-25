@@ -5,6 +5,8 @@
  * Historia:
  * - 22.03.14 - Versão inicial
  * - 22.03.16 - Rotina que inicia a memoria RAM
+ * - 22.03.21 - Implementado Gestor de Dispotivos
+ * - 22.03.23 - Implementado Gestor de Interrupcoes e Multitarefa Basica
  */
 
 #include "husis.h"
@@ -42,6 +44,18 @@ void husis_progresso_erro(txt_t erro, status_t codigo)
 void husis_progresso_altera(int8_t percentual)
 {
     iut_altera_valor(&_obj_progresso, percentual);
+}
+
+// Servico de Comunicacao com Dispositivos
+void husis_int_a0(posicao_t reg1, posicao_t reg2, posicao_t reg3, posicao_t reg4, posicao_t interrupcao, posicao_t codigo_erro)
+{
+    
+}
+
+// Servico de Manipulacao do Sistema de Arquivos
+void husis_int_a1(posicao_t reg1, posicao_t reg2, posicao_t reg3, posicao_t reg4, posicao_t interrupcao, posicao_t codigo_erro)
+{
+    
 }
 
 void husis(txt_t args)
@@ -87,25 +101,52 @@ void husis(txt_t args)
     tam = 1;
     tam += iut_desenha_rotulo(tam,2, 8, "Nucleo: ", COR_CIANO, COR_PRETO);
     tam += iut_desenha_rotulo_nro(tam,2,10, mem_tamanho_processo(PROCESSO_NUCLEO) / 1024, COR_CIANO_CLARO, COR_PRETO);
-    tam += iut_desenha_rotulo(tam,2, 15, " KiB | Inicio: ", COR_CIANO, COR_PRETO);
-    tam += iut_desenha_rotulo_nro(tam,2,10, es_nucleo_primeira_pagina() * 4, COR_CIANO_CLARO, COR_PRETO);
-    tam += iut_desenha_rotulo(tam,2, 15, " KiB | Fim: ", COR_CIANO, COR_PRETO);
-    tam += iut_desenha_rotulo_nro(tam,2,10, es_nucleo_ultima_pagina() * 4, COR_CIANO_CLARO, COR_PRETO);
     iut_desenha_rotulo(tam, 2, 4, " KiB", COR_CIANO, COR_PRETO);
     
-    // Inicia o Gerenciador de Dispositivos
+    // Inicia o Multitarefa
     husis_progresso_altera(20);
+    husis_progresso("Iniciando Multitarefa . . .", "Criando estruturas . . .");
+    processo_prepara();
+    husis_progresso("Iniciando Multitarefa . . .", "Criando processo inicial . . .");
+    processo_altera_status(PROCESSO_NUCLEO, PROCESSO_STATUS_EXECUTANDO);
+    husis_progresso("Iniciando Multitarefa . . .", "Gravando dados do processo inicial . . .");
+    processo_altera_nome(PROCESSO_NUCLEO, "HUSIS");
+    husis_progresso("Iniciando Multitarefa . . .", "Executando processo inicial . . .");
+    es_int_inicia();
+    husis_progresso("Iniciando Interrupcoes do Nucleo . . .", "");
+    es_int_altera(0xa0, &husis_int_a0);
+    es_int_altera(0xa1, &husis_int_a1);
+    
+    // Inicia o Gerenciador de Dispositivos
+    husis_progresso_altera(25);
     husis_progresso("Iniciando Gerenciador de Dispositivos . . .", "");
     dispositivo_inicia();
     
     // Inicia os Controladores de Disco
-    husis_progresso_altera(25);
+    husis_progresso_altera(30);
     husis_progresso("Iniciando Controladores de Disco . . .", "");
     dispositivo_disco_inicia();
+    
+    // Inicia os Controladores de Entrada/Saida
+    husis_progresso_altera(35);
+    husis_progresso("Iniciando Controladores de Entrada/Saida . . .", "");
+    dispositivo_es_inicia();
     
     // Exibe os dispositivos carregados manualmente
     tam = 1;
     tam += iut_desenha_rotulo(tam,3,40,"Quantidade de Controladores Carregados: ", COR_CIANO, COR_PRETO);
     iut_desenha_rotulo_nro(tam, 3, 70, dispositivo_quantidade(), COR_CIANO_CLARO, COR_PRETO);
     
+    husis_progresso("","");
+    
+    for(posicao_t i = 0; i< 1024;i++)
+    {
+        asm("int 0x3");
+        for(posicao_t j = 0; j < 1234;j++)
+        {
+        }
+    }
+    
+    
 }
+
