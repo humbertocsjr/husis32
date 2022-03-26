@@ -1,6 +1,9 @@
 #include "../husis.h"
 #include "../dispositivo.h"
 
+
+
+
 status_t ide_inicia()
 {
     status_t ret = OK;

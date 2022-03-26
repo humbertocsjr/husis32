@@ -16,6 +16,7 @@
 #include "processo.h"
 #include "mem.h"
 #include "dispositivo.h"
+#include "agenda.h"
 
 iut_controle_t _obj_janela;
 iut_controle_t _obj_conteudo1;
@@ -58,6 +59,13 @@ void husis_int_a1(posicao_t reg1, posicao_t reg2, posicao_t reg3, posicao_t reg4
     
 }
 
+agendamento_t teste_agendamento;
+
+void teste_agenda(agendamento_t * agendamento, posicao_t contador)
+{
+    husis_progresso("", "123");
+}
+
 void husis(txt_t args)
 {
     tam_t tam = 0;
@@ -87,6 +95,7 @@ void husis(txt_t args)
     husis_progresso_altera(10);
     husis_progresso("Iniciando . . .", "");
     mem_inicia();
+    agenda_inicia();
     
     // Exibe dados da memória diretamente na tela manualmente
     tam = 1;
@@ -139,14 +148,30 @@ void husis(txt_t args)
     
     husis_progresso("","");
     
-    for(posicao_t i = 0; i< 1024;i++)
-    {
-        asm("int 0x3");
-        for(posicao_t j = 0; j < 1234;j++)
-        {
-        }
-    }
+    teste_agendamento.acao = &teste_agenda;
+    teste_agendamento.decimos = 40;
+    
+    agenda_adiciona(&teste_agendamento);
     
     
 }
 
+
+void aguarda(tam_t unidades)
+{
+    tam_t fim = es_contador() + unidades;
+    while(es_contador() < fim);
+}
+
+status_t aguarda_valor(tam_t unidades, posicao_t * valor)
+{
+    tam_t fim = es_contador() + unidades;
+    while(es_contador() < fim)
+    {
+        if(valor != 0)
+        {
+            return OK;
+        }
+    }
+    return ERRO_TEMPO_ESGOTADO;
+}

@@ -12,6 +12,9 @@ status_t dispositivo_es_inicia()
 #ifndef SEM_INTERFACE
     DISPOSITIVO_INICIA(interface, "Controlador de Interface com Usuario");
 #endif
+#ifndef SEM_RELOGIO
+    DISPOSITIVO_INICIA(relogio, "Relogio");
+#endif
     return ret;
 }
  

@@ -5,4 +5,5 @@
 #define CONFIG_H
 #define MEM_TOTAL_PAGINAS 32768
 #define DISPOSITIVO_TOTAL 256
+#define AGENDA_MAX 256
 #endif

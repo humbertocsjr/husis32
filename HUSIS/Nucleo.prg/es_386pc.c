@@ -15,6 +15,7 @@
 #include "processo.h"
 #include "es_multiboot.h"
 #include "es_int.h"
+#include "agenda.h"
 
 // Ponteiros do SmallerC Linker que apontam para o inicio e fim do binario
 asm("extrn __start_allcode__");
@@ -273,7 +274,7 @@ void es_int_inicia()
     
     // Define o timer do computador
     es_escreva_8(0x43, 0x36);
-    posicao_t timer = 1193180 / 50; // 50 hz
+    posicao_t timer = 1193180 / 100; // 100 hz
     es_escreva_8(0x40, timer & 0xff);
     es_escreva_8(0x40, (timer >> 8) & 0xff);
     
@@ -294,9 +295,21 @@ void es_processar_int(es_registradores_t regs)
     if(regs.interrupcao == 32)
     {
         // Timer
-        es_video_escreva_nro(0,0,10,regs.interrupcao, COR_PRETO, COR_BRANCO);
-        es_video_escreva_nro(10,0,10,regs.codigo_erro, COR_PRETO, COR_BRANCO);
         es_video_escreva_nro(20,0,10,_es_contador, COR_PRETO, COR_BRANCO);
+        extern agendamento_t * _agenda[AGENDA_MAX];
+        if(_es_contador == es_contador_decimos())
+        {
+            for(posicao_t i = 0; i < AGENDA_MAX; i++)
+            {
+                if(_agenda[i]->proximo == _es_contador)
+                {
+                    _agenda[i]->acao(_agenda[i], &_agenda[i]->valor, _agenda[i]->contador);
+                    _agenda[i]->contador++;
+                    _agenda[i] = 0;
+                }
+            }
+        }
+        
         extern processo_t _processo_atual;
         extern processo_dados_t _processos[PROCESSO_TOTAL];
         processo_t proximo = processo_proximo_processo();
@@ -327,6 +340,32 @@ void es_processar_int(es_registradores_t regs)
         es_escreva_8(0xa0, 0x20);
     }
     es_escreva_8(0x20, 0x20);
+}
+
+posicao_t es_contador()
+{
+    return _es_contador;
+}
+
+posicao_t es_converter_decimos(posicao_t decimos)
+{
+    return decimos * 10;
+}
+
+posicao_t es_contador_decimos()
+{
+    posicao_t decimos = _es_contador / 10;
+    return decimos * 10;
+}
+
+void es_int_para()
+{
+    asm("cli");
+}
+
+void es_int_continua()
+{
+    asm("sti");
 }
 
 status_t es_int_altera(posicao_t interrupcao, void (* manipulador)(posicao_t reg1, posicao_t reg2, posicao_t reg3, posicao_t reg4, posicao_t interrupcao, posicao_t codigo_erro))

@@ -3,6 +3,10 @@
 #include "../es_video.h"
 #include "../es_int.h"
 
+#ifndef SEM_INTERFACE
+#include "../iut.h"
+#endif
+
 // Memoria Temporaria Circular para armazenar as teclas apertadas.
 
 #define TECLADO_MAX_TEMP 32
@@ -20,15 +24,9 @@ void teclado_manipulador(posicao_t reg1, posicao_t reg2, posicao_t reg3, posicao
     // Teclado
     uint8_t tecla = es_leia_8(0x60);
     
-    if(tecla & 0x80)
-    {
-        
-    }
-    else
-    {
-        es_video_escreva_nro(30,0,10, tecla, COR_PRETO, COR_BRANCO);
-        es_video_escreva_nro(40,0,10, _teclado_tamanho, COR_PRETO, COR_BRANCO);
-    }
+#ifndef SEM_INTERFACE
+    if(iut_processa_tecla((posicao_t)tecla) == PROCESSADO) return;
+#endif
     
     if(!(_teclado_pos_gravacao != _teclado_pos_leitura | _teclado_tamanho == 0) | _teclado_ultima_tecla == tecla)
     {

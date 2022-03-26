@@ -81,6 +81,44 @@ status_t iut_adiciona(iut_controle_t * acima, iut_controle_t * controle)
     return ERRO_ESTOURO_DE_CAPACIDADE;
 }
 
+
+status_t iut_processa_tecla(posicao_t tecla)
+{
+    status_t ret = PROCESSADO;
+    es_video_escreva_txt(0, 24, 10, "TECLA: ", _iut_estilo_comum, _iut_estilo_fundo, ES_VIDEO_LIMITE_LINHA);
+    es_video_escreva_nro(7, 24, 10, tecla, _iut_estilo_comum, _iut_estilo_fundo);
+    return ret;
+}
+
+void iut_processa_data(data_t data)
+{
+    es_video_escreva_txt(iut_largura() - 9, 0, 8, " 0:00:00", _iut_estilo_menu_comum, _iut_estilo_menu_fundo, ES_VIDEO_LIMITE_LINHA);
+    if(data.hora < 10)
+    {
+        es_video_escreva_nro(iut_largura() - 8, 0, 1, data.hora, _iut_estilo_menu_comum, _iut_estilo_menu_fundo);
+    }
+    else
+    {
+        es_video_escreva_nro(iut_largura() - 9, 0, 2, data.hora, _iut_estilo_menu_comum, _iut_estilo_menu_fundo);
+    }
+    if(data.min < 10)
+    {
+        es_video_escreva_nro(iut_largura() - 5, 0, 1, data.min, _iut_estilo_menu_comum, _iut_estilo_menu_fundo);
+    }
+    else
+    {
+        es_video_escreva_nro(iut_largura() - 6, 0, 2, data.min, _iut_estilo_menu_comum, _iut_estilo_menu_fundo);
+    }
+    if(data.seg < 10)
+    {
+        es_video_escreva_nro(iut_largura() - 2, 0, 1, data.seg, _iut_estilo_menu_comum, _iut_estilo_menu_fundo);
+    }
+    else
+    {
+        es_video_escreva_nro(iut_largura() - 3, 0, 2, data.seg, _iut_estilo_menu_comum, _iut_estilo_menu_fundo);
+    }
+}
+
 void iut_altera_texto(iut_controle_t * controle, txt_t texto)
 {
     controle->texto = texto;

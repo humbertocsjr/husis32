@@ -22,4 +22,7 @@ posicao_t es_nucleo_ultima_pagina();
 void es_aplicar_areas_restritas(tam_t capacidade_paginas);
 tam_t es_mem_tamanho();
 
+posicao_t es_contador();
+posicao_t es_converter_decimos(posicao_t decimos);
+posicao_t es_contador_decimos();
 #endif

@@ -10,6 +10,9 @@ struct es_int_registro
 typedef struct es_int_registro es_int_registro_t;
 
 void es_int_inicia();
+
+void es_int_para();
+void es_int_continua();
 status_t es_int_altera(posicao_t interrupcao, void (* manipulador)(posicao_t reg1, posicao_t reg2, posicao_t reg3, posicao_t reg4, posicao_t interrupcao, posicao_t codigo_erro));
 
 #endif

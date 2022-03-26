@@ -29,10 +29,10 @@ all:
 bochs: all
 	@bochs
 qemu: all
-	@qemu-system-i386 -m 32 Imagens/Disco.iso
+	@qemu-system-i386 -rtc base=localtime -m 32 Imagens/Disco.iso
 
 disquete: all
-	@qemu-system-i386 -m 32 -fda Imagens/Disquete.img -no-reboot 
+	@qemu-system-i386 -rtc base=localtime -m 32 -fda Imagens/Disquete.img -no-reboot 
 	
 86box: all
 	@cd ../86Box && ./86Box.AppImage

@@ -41,15 +41,31 @@ typedef char * txt_t;
 typedef unsigned char cor_t;
 typedef unsigned short status_t;
 
+struct data
+{
+    uint16_t ano;
+    uint8_t mes;
+    uint8_t dia;
+    uint8_t hora;
+    uint8_t min;
+    uint8_t seg;
+};
+
+typedef struct data data_t;
+
 #define OK 0
 #define IGUAL 0
+#define PROCESSADO 0
 #define ERRO_ACESSO_NEGADO 1
 #define ERRO_NAO_ENCONTRADO 2
 #define DIFERENTE 3
 #define ERRO_DIFERENTE 3
 #define ERRO_ARGUMENTO_INVALIDO 4
 #define ERRO_DADOS_CORROMPIDOS 5
+#define ERRO_TEMPO_ESGOTADO 6
 #define ERRO_ESTOURO_DE_CAPACIDADE 10
+#define ERRO_CANCELADO 7
+#define CANCELADO 7
 
 #define COR_PRETO 0
 #define COR_AZUL 1
@@ -73,6 +89,12 @@ void husis_progresso(txt_t texto1, txt_t texto2);
 void husis_progresso_erro(txt_t erro, status_t codigo);
 void husis_progresso_altera(int8_t percentual);
 
+// Aguarda o contador do sistema durante X unidades
+void aguarda(tam_t unidades);
+
+// Aguarda o valor ficar diferente de 0 ou desiste depois de X unidades
+// Retorna: OK ou ERRO_TEMPO_ESGOTADO
+status_t aguarda_valor(tam_t unidades, posicao_t * valor);
 #include "config.h"
 
 #endif

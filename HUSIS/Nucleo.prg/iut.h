@@ -99,6 +99,9 @@ void iut_inicia();
 status_t iut_adiciona(iut_controle_t * acima, iut_controle_t * controle);
 void iut_redesenha(iut_controle_t * controle);
 
+// Chamado pelo Controlador de Teclado, retorna PROCESSADO ou CANCELADO (continua processando pelo lado do controlador)
+status_t iut_processa_tecla(posicao_t tecla);
+void iut_processa_data(data_t data);
 
 void iut_altera_texto(iut_controle_t * controle, txt_t texto);
 void iut_altera_valor(iut_controle_t * controle, posicao_t valor);

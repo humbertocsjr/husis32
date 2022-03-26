@@ -78,13 +78,44 @@ void disquete_grava_dma()
     es_escreva_8(0xa, 0x2); // Desmascara o canal 2 DMA
 }
 
-void disquete_redefine(posicao_t id)
+status_t disquete_escreva_8(posicao_t id, uint8_t dado)
 {
-    _disquete_req_recebida = 0;
-    // Desliga os motores
-    es_escreva_8(DISQUETE_PORTA_RSD, DISQUETE_RSD_DMA | DISQUETE_RSD_REDEFINE);
-    while(_disquete_req_recebida > 0);
+    for(posicao_t i = 0; i < 75; i++)
+    {
+        if((es_leia_8(DISQUETE_PORTA_RSP & 0xc0)) == 0x80)
+        {
+            es_escreva_8(DISQUETE_PORTA_PEPS, dado);
+            return OK;
+        }
+        aguarda(1);
+    }
+    return ERRO_TEMPO_ESGOTADO;
+}
+
+status_t disquete_leia_8(posicao_t id, uint8_t * dado)
+{
     
+}
+
+status_t disquete_ultimo_status(posicao_t id)
+{
+    
+}
+
+status_t disquete_redefine(posicao_t id)
+{
+    status_t ret = OK;
+    // Para tudo
+    es_escreva_8(DISQUETE_PORTA_RSD, DISQUETE_RSD_DMA);
+    aguarda(10);
+    // Reinicia tudo
+    es_escreva_8(DISQUETE_PORTA_CONTROL, 0);
+    _disquete_req_recebida = 0;
+    es_escreva_8(DISQUETE_PORTA_RSD, DISQUETE_RSD_DMA | DISQUETE_RSD_REDEFINE);
+    // Aguarda interrupcao retornar
+    VALIDA(aguarda_valor(50, &_disquete_req_recebida));
+    
+    return ret;
 }
 
 tam_t disquete_leia_bloco(posicao_t dispositivo, byte_t * destino, posicao_t posicao, tam_t quantidade)
@@ -116,6 +147,10 @@ status_t disquete_registra(txt_t nome, posicao_t id, tam_t cilindros, tam_t cabe
 status_t disquete_inicia()
 {
     status_t ret = OK;
+    
+    // Codigo anulado enquanto estiver em fase de prototipo
+    return ret;
+    
     posicao_t cmos_dados = 0;
     posicao_t disquete0 = 0;
     posicao_t disquete1 = 0;
@@ -150,8 +185,8 @@ status_t disquete_inicia()
     if(ENTRE(disquete1, 1, 2)) VALIDA(disquete_registra("Disquete1_360", 1, 40, 2, 9));
     if(disquete1 == 2) VALIDA(disquete_registra("Disquete1_1200", 1, 80, 2, 15));
     
-    if(disquete0 > 0) disquete_redefine(0);
-    if(disquete1 > 0) disquete_redefine(1);
+    //if(disquete0 > 0) disquete_redefine(0);
+    //if(disquete1 > 0) disquete_redefine(1);
     return ret;
 }
 
